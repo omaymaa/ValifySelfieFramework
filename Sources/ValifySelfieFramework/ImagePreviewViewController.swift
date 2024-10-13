@@ -7,24 +7,17 @@
 
 import UIKit
 
-// Protocol to notify the delegate when the image is approved or recapture is requested.
 public protocol ImagePreviewDelegate: AnyObject {
     func didApproveImage(_ image: UIImage)
     func didRequestRecapture()
 }
 
 public class ImagePreviewViewController: UIViewController {
-
+    var image: UIImage
     public weak var delegate: ImagePreviewDelegate?
 
-    private var capturedImage: UIImage
-    private let imageView = UIImageView()
-    private let approveButton = UIButton(type: .system)
-    private let recaptureButton = UIButton(type: .system)
-
-    // Initializer to pass the captured image to the view controller
     public init(image: UIImage) {
-        self.capturedImage = image
+        self.image = image
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -32,63 +25,44 @@ public class ImagePreviewViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override public func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .black
 
-        setupView()
-    }
-
-    private func setupView() {
-        view.backgroundColor = .white
-
-        // Configure the imageView
-        imageView.image = capturedImage
+        let imageView = UIImageView(image: image)
         imageView.contentMode = .scaleAspectFit
-        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.frame = view.bounds
         view.addSubview(imageView)
 
-        // Configure the approve button
+        // Approval Button
+        let approveButton = UIButton(type: .system)
         approveButton.setTitle("Approve", for: .normal)
         approveButton.addTarget(self, action: #selector(approveImage), for: .touchUpInside)
         approveButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(approveButton)
 
-        // Configure the recapture button
+        // Recapture Button
+        let recaptureButton = UIButton(type: .system)
         recaptureButton.setTitle("Recapture", for: .normal)
         recaptureButton.addTarget(self, action: #selector(requestRecapture), for: .touchUpInside)
         recaptureButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(recaptureButton)
 
-        // Layout the elements using Auto Layout
-        setupConstraints()
-    }
-
-    private func setupConstraints() {
+        // Layout Constraints
         NSLayoutConstraint.activate([
-            // Image view constraints
-            imageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            imageView.heightAnchor.constraint(equalToConstant: 300),
-
-            // Approve button constraints
-            approveButton.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 20),
             approveButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-
-            // Recapture button constraints
-            recaptureButton.topAnchor.constraint(equalTo: approveButton.bottomAnchor, constant: 20),
+            approveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -50),
             recaptureButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            recaptureButton.bottomAnchor.constraint(equalTo: approveButton.topAnchor, constant: -20)
         ])
     }
 
-    @objc private func approveImage() {
-        // Notify the delegate that the image has been approved
-        delegate?.didApproveImage(capturedImage)
+    @objc func approveImage() {
+        delegate?.didApproveImage(image)
         dismiss(animated: true)
     }
 
-    @objc private func requestRecapture() {
-        // Notify the delegate that the user wants to recapture the image
+    @objc func requestRecapture() {
         delegate?.didRequestRecapture()
         dismiss(animated: true)
     }
