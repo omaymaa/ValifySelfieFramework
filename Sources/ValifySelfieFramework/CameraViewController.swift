@@ -31,6 +31,9 @@ public class CameraViewController: UIViewController {
         // Capture button
         let captureButton = UIButton(type: .system)
         captureButton.setTitle("Capture", for: .normal)
+        captureButton.backgroundColor = UIColor.systemBlue
+        captureButton.setTitleColor(.white, for: .normal)
+        captureButton.layer.cornerRadius = 10
         captureButton.addTarget(self, action: #selector(capturePhoto), for: .touchUpInside)
         captureButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(captureButton)
@@ -38,6 +41,9 @@ public class CameraViewController: UIViewController {
         // Switch camera button
         let switchCameraButton = UIButton(type: .system)
         switchCameraButton.setTitle("Switch", for: .normal)
+        switchCameraButton.backgroundColor = UIColor.systemGreen
+        switchCameraButton.setTitleColor(.white, for: .normal)
+        switchCameraButton.layer.cornerRadius = 10
         switchCameraButton.addTarget(self, action: #selector(switchCamera), for: .touchUpInside)
         switchCameraButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(switchCameraButton)
@@ -45,9 +51,14 @@ public class CameraViewController: UIViewController {
         // Layout constraints
         NSLayoutConstraint.activate([
             captureButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            captureButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            captureButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -40),
+            captureButton.widthAnchor.constraint(equalToConstant: 120),
+            captureButton.heightAnchor.constraint(equalToConstant: 50),
+
             switchCameraButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-            switchCameraButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
+            switchCameraButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -40),
+            switchCameraButton.widthAnchor.constraint(equalToConstant: 120),
+            switchCameraButton.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
 
