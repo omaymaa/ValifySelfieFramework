@@ -20,10 +20,10 @@ public class CameraViewController: UIViewController {
     var currentCameraPosition: AVCaptureDevice.Position = .front
     public weak var delegate: ValifySelfieFrameworkDelegate?
 
-
     override public func viewDidLoad() {
         super.viewDidLoad()
         setupCamera()
+        setupCaptureButton()
     }
 
     func setupCamera() {
@@ -40,92 +40,77 @@ public class CameraViewController: UIViewController {
         view.layer.insertSublayer(previewLayer, at: 0)
 
         captureSession.startRunning()
-
-        // Add pinch gesture recognizer to switch cameras
-        let pinchGesture = UIPinchGestureRecognizer(target: self, action: #selector(switchCamera))
-        view.addGestureRecognizer(pinchGesture)
-
-        // Add a button to capture image
-        let captureButton = UIButton(frame: CGRect(x: (view.bounds.width - 70) / 2, y: view.bounds.height - 100, width: 70, height: 70))
-        captureButton.layer.cornerRadius = 35
-        captureButton.backgroundColor = .white
-        captureButton.setTitle("Capture", for: .normal)
-        captureButton.setTitleColor(.black, for: .normal)
-        captureButton.addTarget(self, action: #selector(captureImage), for: .touchUpInside)
-        view.addSubview(captureButton)
     }
 
     func configureCamera(for position: AVCaptureDevice.Position) {
-        // Begin configuring the session
+        // Configure the camera based on the position (front/back)
         captureSession.beginConfiguration()
-
-        // Remove existing inputs
         if let currentInput = captureSession.inputs.first as? AVCaptureDeviceInput {
             captureSession.removeInput(currentInput)
         }
-
-        // Add new camera input
         guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position) else {
             print("Error: No camera available")
             return
         }
-
         do {
             let input = try AVCaptureDeviceInput(device: camera)
             captureSession.addInput(input)
         } catch {
             print("Error: Unable to add camera input: \(error.localizedDescription)")
         }
-
         captureSession.commitConfiguration()
     }
 
-    @objc func switchCamera() {
-        // Toggle camera position
-        currentCameraPosition = (currentCameraPosition == .back) ? .front : .back
-        configureCamera(for: currentCameraPosition)
+    func setupCaptureButton() {
+        let captureButton = UIButton(type: .system)
+        captureButton.setTitle("Capture Selfie", for: .normal)
+        captureButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20) // Make the font bold and larger
+        captureButton.backgroundColor = .systemBlue // Set a background color
+        captureButton.setTitleColor(.white, for: .normal) // Set title color to white
+        captureButton.layer.cornerRadius = 10 // Add corner radius
+        captureButton.addTarget(self, action: #selector(captureSelfie), for: .touchUpInside)
+
+        captureButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(captureButton)
+
+        // Set up constraints to position the button
+        NSLayoutConstraint.activate([
+            captureButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            captureButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20), // Use safe area
+            captureButton.widthAnchor.constraint(equalToConstant: 200), // Set a fixed width
+            captureButton.heightAnchor.constraint(equalToConstant: 50) // Set a fixed height
+        ])
     }
 
-    @objc func captureImage() {
+    @objc func captureSelfie() {
         let settings = AVCapturePhotoSettings()
         cameraOutput.capturePhoto(with: settings, delegate: self)
     }
 
     override public func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        // Update preview layer to match view bounds after rotation or layout changes
-        previewLayer.frame = view.bounds
+        previewLayer.frame = view.bounds // Update preview layer frame
     }
 
     override public func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        // Stop the camera session when the view disappears
-        captureSession.stopRunning()
+        captureSession.stopRunning() // Stop the camera session
     }
 }
 
 // MARK: - AVCapturePhotoCaptureDelegate
 extension CameraViewController: AVCapturePhotoCaptureDelegate {
-    public func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto) {
+    public func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
+        if let error = error {
+            print("Error capturing photo: \(error)")
+            return
+        }
+
         guard let imageData = photo.fileDataRepresentation(),
               let image = UIImage(data: imageData) else { return }
 
-        let previewVC = ImagePreviewViewController(image: image)
-        previewVC.delegate = self
-        present(previewVC, animated: true)
-    }
-}
-
-// MARK: - ImagePreviewDelegate
-extension CameraViewController: ImagePreviewDelegate {
-    public func didApproveImage(_ image: UIImage) {
-        // Handle approved image
-        print("Image approved")
-        // You can pass the image to your ViewController or delegate it back.
-    }
-
-    public func didRequestRecapture() {
-        // Handle recapture request
-        print("User requested to recapture the image.")
+        // Notify the delegate about the captured image
+        delegate?.didCaptureImage(image)
+        dismiss(animated: true)
     }
 }
