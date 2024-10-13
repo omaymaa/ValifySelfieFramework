@@ -8,9 +8,6 @@
 import UIKit
 import AVFoundation
 
-import UIKit
-import AVFoundation
-
 public class CameraViewController: UIViewController {
 
     var captureSession: AVCaptureSession!
@@ -41,6 +38,15 @@ public class CameraViewController: UIViewController {
         // Add pinch gesture recognizer to switch cameras
         let pinchGesture = UIPinchGestureRecognizer(target: self, action: #selector(switchCamera))
         view.addGestureRecognizer(pinchGesture)
+
+        // Add a button to capture image
+        let captureButton = UIButton(frame: CGRect(x: (view.bounds.width - 70) / 2, y: view.bounds.height - 100, width: 70, height: 70))
+        captureButton.layer.cornerRadius = 35
+        captureButton.backgroundColor = .white
+        captureButton.setTitle("Capture", for: .normal)
+        captureButton.setTitleColor(.black, for: .normal)
+        captureButton.addTarget(self, action: #selector(captureImage), for: .touchUpInside)
+        view.addSubview(captureButton)
     }
 
     func configureCamera(for position: AVCaptureDevice.Position) {
@@ -74,6 +80,11 @@ public class CameraViewController: UIViewController {
         configureCamera(for: currentCameraPosition)
     }
 
+    @objc func captureImage() {
+        let settings = AVCapturePhotoSettings()
+        cameraOutput.capturePhoto(with: settings, delegate: self)
+    }
+
     override public func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         // Update preview layer to match view bounds after rotation or layout changes
@@ -84,5 +95,31 @@ public class CameraViewController: UIViewController {
         super.viewWillDisappear(animated)
         // Stop the camera session when the view disappears
         captureSession.stopRunning()
+    }
+}
+
+// MARK: - AVCapturePhotoCaptureDelegate
+extension CameraViewController: AVCapturePhotoCaptureDelegate {
+    public func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto) {
+        guard let imageData = photo.fileDataRepresentation(),
+              let image = UIImage(data: imageData) else { return }
+
+        let previewVC = ImagePreviewViewController(image: image)
+        previewVC.delegate = self
+        present(previewVC, animated: true)
+    }
+}
+
+// MARK: - ImagePreviewDelegate
+extension CameraViewController: ImagePreviewDelegate {
+    public func didApproveImage(_ image: UIImage) {
+        // Handle approved image
+        print("Image approved")
+        // You can pass the image to your ViewController or delegate it back.
+    }
+
+    public func didRequestRecapture() {
+        // Handle recapture request
+        print("User requested to recapture the image.")
     }
 }
