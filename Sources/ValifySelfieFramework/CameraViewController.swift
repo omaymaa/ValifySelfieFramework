@@ -8,12 +8,18 @@
 import UIKit
 import AVFoundation
 
+public protocol ValifySelfieFrameworkDelegate: AnyObject {
+    func didCaptureImage(_ image: UIImage)
+}
+
 public class CameraViewController: UIViewController {
 
     var captureSession: AVCaptureSession!
     var cameraOutput: AVCapturePhotoOutput!
     var previewLayer: AVCaptureVideoPreviewLayer!
     var currentCameraPosition: AVCaptureDevice.Position = .front
+    public weak var delegate: ValifySelfieFrameworkDelegate?
+
 
     override public func viewDidLoad() {
         super.viewDidLoad()
