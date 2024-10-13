@@ -27,11 +27,12 @@ public class ImagePreviewViewController: UIViewController {
 
     public override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .black
+        view.backgroundColor = .white
 
+        // Image View
         let imageView = UIImageView(image: image)
         imageView.contentMode = .scaleAspectFit
-        imageView.frame = view.bounds
+        imageView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(imageView)
 
         // Approval Button
@@ -50,10 +51,19 @@ public class ImagePreviewViewController: UIViewController {
 
         // Layout Constraints
         NSLayoutConstraint.activate([
+            // ImageView Constraints (300x300 and centered horizontally)
+            imageView.widthAnchor.constraint(equalToConstant: 300),
+            imageView.heightAnchor.constraint(equalToConstant: 300),
+            imageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            imageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50),
+
+            // Approve Button Constraints (beneath the image)
             approveButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            approveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -50),
+            approveButton.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 30),
+
+            // Recapture Button Constraints (beneath the approve button)
             recaptureButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            recaptureButton.bottomAnchor.constraint(equalTo: approveButton.topAnchor, constant: -20)
+            recaptureButton.topAnchor.constraint(equalTo: approveButton.bottomAnchor, constant: 20)
         ])
     }
 
