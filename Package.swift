@@ -12,10 +12,13 @@ let package = Package(
             name: "ValifySelfieFramework",
             targets: ["ValifySelfieFramework"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/d-date/google-mlkit-swiftpm", from: "5.0.0"),
+    ],
     targets: [
         .target(
             name: "ValifySelfieFramework",
-            dependencies: []),
+            dependencies: ["GoogleMLKitFaceDetection"]), // Add ML Kit dependency
         .testTarget(
             name: "ValifySelfieFrameworkTests",
             dependencies: ["ValifySelfieFramework"]),
