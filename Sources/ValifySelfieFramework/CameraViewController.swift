@@ -29,9 +29,17 @@ public class CameraViewController: UIViewController {
         captureSession = AVCaptureSession()
         captureSession.sessionPreset = .photo
 
-        guard let camera = AVCaptureDevice.default(for: .video) else { return }
-        let input = try! AVCaptureDeviceInput(device: camera)
-        captureSession.addInput(input)
+        guard let camera = AVCaptureDevice.default(for: .video) else {
+            print("Error: No camera available")
+            return
+        }
+        do {
+            let input = try AVCaptureDeviceInput(device: camera)
+            captureSession.addInput(input)
+        } catch {
+            print("Error: Unable to add camera input: \(error.localizedDescription)")
+            return
+        }
 
         cameraOutput = AVCapturePhotoOutput()
         captureSession.addOutput(cameraOutput)
@@ -42,6 +50,7 @@ public class CameraViewController: UIViewController {
 
         captureSession.startRunning()
     }
+
 
     @objc func capturePhoto() {
         let settings = AVCapturePhotoSettings()
