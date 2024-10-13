@@ -19,17 +19,64 @@ public class CameraViewController: UIViewController {
     var captureSession: AVCaptureSession!
     var cameraOutput: AVCapturePhotoOutput!
     var previewLayer: AVCaptureVideoPreviewLayer!
+    var currentCameraPosition: AVCaptureDevice.Position = .front
 
     override public func viewDidLoad() {
         super.viewDidLoad()
+        setupUI() // Setup buttons and UI elements
         setupCamera()
+    }
+
+    func setupUI() {
+        // Capture button
+        let captureButton = UIButton(type: .system)
+        captureButton.setTitle("Capture", for: .normal)
+        captureButton.addTarget(self, action: #selector(capturePhoto), for: .touchUpInside)
+        captureButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(captureButton)
+
+        // Switch camera button
+        let switchCameraButton = UIButton(type: .system)
+        switchCameraButton.setTitle("Switch", for: .normal)
+        switchCameraButton.addTarget(self, action: #selector(switchCamera), for: .touchUpInside)
+        switchCameraButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(switchCameraButton)
+
+        // Layout constraints
+        NSLayoutConstraint.activate([
+            captureButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            captureButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            switchCameraButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            switchCameraButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
+        ])
     }
 
     func setupCamera() {
         captureSession = AVCaptureSession()
         captureSession.sessionPreset = .photo
+        configureCamera(for: currentCameraPosition)
 
-        guard let camera = AVCaptureDevice.default(for: .video) else {
+        cameraOutput = AVCapturePhotoOutput()
+        captureSession.addOutput(cameraOutput)
+
+        previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+        previewLayer.videoGravity = .resizeAspectFill
+        previewLayer.frame = view.bounds
+        view.layer.insertSublayer(previewLayer, at: 0)
+
+        captureSession.startRunning()
+    }
+
+    func configureCamera(for position: AVCaptureDevice.Position) {
+        captureSession.beginConfiguration()
+
+        // Remove existing inputs
+        if let currentInput = captureSession.inputs.first {
+            captureSession.removeInput(currentInput)
+        }
+
+        // Add new input
+        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position) else {
             print("Error: No camera available")
             return
         }
@@ -38,26 +85,29 @@ public class CameraViewController: UIViewController {
             captureSession.addInput(input)
         } catch {
             print("Error: Unable to add camera input: \(error.localizedDescription)")
-            return
         }
 
-        cameraOutput = AVCapturePhotoOutput()
-        captureSession.addOutput(cameraOutput)
-
-        previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-        previewLayer.frame = view.bounds
-        view.layer.addSublayer(previewLayer)
-
-        captureSession.startRunning()
+        captureSession.commitConfiguration()
     }
-
 
     @objc func capturePhoto() {
         let settings = AVCapturePhotoSettings()
         cameraOutput.capturePhoto(with: settings, delegate: self)
     }
+
+    @objc func switchCamera() {
+        currentCameraPosition = (currentCameraPosition == .back) ? .front : .back
+        configureCamera(for: currentCameraPosition)
+    }
+
+    override public func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Update preview layer to match view bounds after rotation or layout changes
+        previewLayer.frame = view.bounds
+    }
 }
 
+// MARK: - Photo Capture Delegate
 
 extension CameraViewController: AVCapturePhotoCaptureDelegate {
     public func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
@@ -70,6 +120,8 @@ extension CameraViewController: AVCapturePhotoCaptureDelegate {
     }
 }
 
+// MARK: - Image Preview Delegate
+
 extension CameraViewController: ImagePreviewDelegate {
     public func didApproveImage(_ image: UIImage) {
         // Notify the app that the image was approved via the delegate
@@ -81,5 +133,3 @@ extension CameraViewController: ImagePreviewDelegate {
         captureSession.startRunning()
     }
 }
-
-
