@@ -2,6 +2,7 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
+
 let package = Package(
     name: "ValifySelfieFramework",
     platforms: [
@@ -13,14 +14,15 @@ let package = Package(
             targets: ["ValifySelfieFramework"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/d-date/google-mlkit-swiftpm", from: "5.0.0"),
     ],
     targets: [
         .target(
             name: "ValifySelfieFramework",
-            dependencies: ["GoogleMLKitFaceDetection"]), // Add ML Kit dependency
+            dependencies: [] 
+        ),
         .testTarget(
             name: "ValifySelfieFrameworkTests",
             dependencies: ["ValifySelfieFramework"]),
     ]
 )
+
