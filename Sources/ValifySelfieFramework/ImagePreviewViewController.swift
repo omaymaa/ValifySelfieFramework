@@ -38,6 +38,10 @@ public class ImagePreviewViewController: UIViewController {
         // Approval Button
         let approveButton = UIButton(type: .system)
         approveButton.setTitle("Approve", for: .normal)
+        approveButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20) // Bold font
+        approveButton.setTitleColor(.white, for: .normal) // Text color
+        approveButton.backgroundColor = .systemGreen // Background color
+        approveButton.layer.cornerRadius = 10 // Rounded corners
         approveButton.addTarget(self, action: #selector(approveImage), for: .touchUpInside)
         approveButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(approveButton)
@@ -45,6 +49,10 @@ public class ImagePreviewViewController: UIViewController {
         // Recapture Button
         let recaptureButton = UIButton(type: .system)
         recaptureButton.setTitle("Recapture", for: .normal)
+        recaptureButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20) // Bold font
+        recaptureButton.setTitleColor(.white, for: .normal) // Text color
+        recaptureButton.backgroundColor = .systemRed // Background color
+        recaptureButton.layer.cornerRadius = 10 // Rounded corners
         recaptureButton.addTarget(self, action: #selector(requestRecapture), for: .touchUpInside)
         recaptureButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(recaptureButton)
@@ -60,10 +68,14 @@ public class ImagePreviewViewController: UIViewController {
             // Approve Button Constraints (beneath the image)
             approveButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             approveButton.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 30),
+            approveButton.widthAnchor.constraint(equalToConstant: 200), // Fixed width
+            approveButton.heightAnchor.constraint(equalToConstant: 50), // Fixed height
 
             // Recapture Button Constraints (beneath the approve button)
             recaptureButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            recaptureButton.topAnchor.constraint(equalTo: approveButton.bottomAnchor, constant: 20)
+            recaptureButton.topAnchor.constraint(equalTo: approveButton.bottomAnchor, constant: 20),
+            recaptureButton.widthAnchor.constraint(equalToConstant: 200), // Fixed width
+            recaptureButton.heightAnchor.constraint(equalToConstant: 50) // Fixed height
         ])
     }
 
