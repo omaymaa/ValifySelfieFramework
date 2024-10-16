@@ -39,7 +39,10 @@ public class CameraViewController: UIViewController {
         previewLayer.frame = view.bounds
         view.layer.insertSublayer(previewLayer, at: 0)
 
-        captureSession.startRunning()
+        // Start the capture session on a background thread
+        DispatchQueue.global(qos: .background).async { [weak self] in
+            self?.captureSession.startRunning()
+        }
     }
 
     func configureCamera(for position: AVCaptureDevice.Position) {
